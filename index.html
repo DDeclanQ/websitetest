@@ -164,6 +164,11 @@
       gap: 6px;
     }
 
+    .start-button.active, .start-button:active {
+      border-color: var(--border-black) var(--border-light) var(--border-light) var(--border-black);
+      background: #e0e0e0;
+    }
+
     .taskbar-divider {
       width: 2px;
       height: 22px;
@@ -177,17 +182,19 @@
       flex-grow: 1;
     }
 
+    /* Taskbar App Item */
     .taskbar-app {
-      padding: 3px 8px;
+      padding: 3px 6px;
       background: var(--os-gray);
       border: 2px solid;
       border-color: var(--border-light) var(--border-black) var(--border-black) var(--border-light);
       cursor: pointer;
       font-size: 11px;
-      max-width: 140px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      max-width: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
     }
 
     .taskbar-app.active {
@@ -196,14 +203,149 @@
       font-weight: bold;
     }
 
-    .clock {
+    .taskbar-app-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Hover Close Button on Taskbar Items */
+    .taskbar-close-btn {
+      display: none;
+      width: 14px;
+      height: 12px;
+      background-color: var(--os-gray);
+      border: 1px solid;
+      border-color: var(--border-light) var(--border-black) var(--border-black) var(--border-light);
+      font-size: 8px;
+      line-height: 8px;
+      font-weight: bold;
+      text-align: center;
+      padding: 0;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .taskbar-app:hover .taskbar-close-btn {
+      display: inline-block;
+    }
+
+    .taskbar-close-btn:hover {
+      background-color: #e60000;
+      color: white;
+      border-color: var(--border-black) var(--border-light) var(--border-light) var(--border-black);
+    }
+
+    /* System Tray Area */
+    .system-tray {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tray-box {
       border: 2px inset var(--border-dark);
-      padding: 2px 8px;
+      padding: 2px 6px;
       font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 24px;
+    }
+
+    .speaker-btn {
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      display: inline-block;
+      transition: transform 0.05s ease;
+    }
+
+    .speaker-btn:active {
+      transform: scale(0.85);
+    }
+
+    /* Start Menu Styles */
+    .start-menu {
+      position: fixed;
+      bottom: 36px;
+      left: 2px;
+      background-color: var(--os-gray);
+      border: 2px solid;
+      border-color: var(--border-light) var(--border-black) var(--border-black) var(--border-light);
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+      display: none;
+      flex-direction: row;
+      z-index: 10001;
+      min-width: 200px;
+    }
+
+    .start-menu.open {
+      display: flex;
+    }
+
+    .start-sidebar {
+      background: linear-gradient(to top, #000080, #1084d0);
+      color: white;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      padding: 10px 4px;
+      font-weight: bold;
+      font-size: 15px;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      text-shadow: 1px 1px 2px #000;
+    }
+
+    .start-sidebar span {
+      font-weight: normal;
+      opacity: 0.8;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .start-menu-items {
+      display: flex;
+      flex-direction: column;
+      padding: 2px;
+      width: 100%;
+    }
+
+    .start-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: black;
+      font-size: 12px;
+    }
+
+    .start-item:hover {
+      background-color: var(--navy-blue);
+      color: white;
+    }
+
+    .start-icon {
+      font-size: 18px;
+      width: 22px;
+      text-align: center;
+    }
+
+    .menu-divider {
+      height: 0;
+      border-top: 1px solid var(--border-dark);
+      border-bottom: 1px solid var(--border-light);
+      margin: 3px 2px;
     }
   </style>
 </head>
 <body>
+
+  <!-- Audio Element -->
+  <audio id="retro-sound" src="sound.wav" preload="auto"></audio>
 
   <!-- Desktop Icons -->
   <div class="desktop">
@@ -309,12 +451,47 @@
     </div>
   </div>
 
+  <!-- Start Menu Popup -->
+  <div id="start-menu" class="start-menu">
+    <div class="start-sidebar">Retro OS <span>2026</span></div>
+    <div class="start-menu-items">
+      <div class="start-item" onclick="openApp('home-win'); toggleStartMenu();">
+        <span class="start-icon">🏠</span>
+        <span>Home.exe</span>
+      </div>
+      <div class="start-item" onclick="openApp('blog-win'); toggleStartMenu();">
+        <span class="start-icon">📰</span>
+        <span>BlogReader.exe</span>
+      </div>
+      <div class="start-item" onclick="openApp('about-win'); toggleStartMenu();">
+        <span class="start-icon">💾</span>
+        <span>AboutUs.txt</span>
+      </div>
+      <div class="start-item" onclick="openApp('contact-win'); toggleStartMenu();">
+        <span class="start-icon">📫</span>
+        <span>Contact.exe</span>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="start-item" onclick="shutdownOS()">
+        <span class="start-icon">💻</span>
+        <span>Shut Down...</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Taskbar -->
   <div class="taskbar">
-    <button class="start-button">💻 Start</button>
+    <button id="start-btn" class="start-button" onclick="toggleStartMenu()">💻 Start</button>
     <div class="taskbar-divider"></div>
     <div id="open-apps" class="open-apps"></div>
-    <div class="clock" id="clock">12:00 PM</div>
+    <div class="system-tray">
+      <div class="tray-box">
+        <span class="speaker-btn" onclick="playSound()" title="Play Audio">🔊</span>
+      </div>
+      <div class="tray-box">
+        <span id="clock">12:00 PM</span>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -363,16 +540,33 @@
       renderTaskbar();
     }
 
+    // Render Taskbar Buttons with Hover-to-Close Capability
     function renderTaskbar() {
       const container = document.getElementById('open-apps');
       container.innerHTML = '';
       
       document.querySelectorAll('.window.active').forEach(win => {
         const title = win.querySelector('.title-bar span').innerText;
-        const btn = document.createElement('button');
+        
+        const btn = document.createElement('div');
         btn.className = 'taskbar-app active';
-        btn.innerText = title;
         btn.onclick = () => bringToFront(win);
+
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'taskbar-app-title';
+        titleSpan.innerText = title;
+
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'taskbar-close-btn';
+        closeBtn.innerText = '✕';
+        closeBtn.title = 'Close window';
+        closeBtn.onclick = (e) => {
+          e.stopPropagation();
+          closeApp(win.id);
+        };
+
+        btn.appendChild(titleSpan);
+        btn.appendChild(closeBtn);
         container.appendChild(btn);
       });
     }
@@ -380,6 +574,48 @@
     function updateClock() {
       const now = new Date();
       document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // --- Audio Sound Trigger ---
+    function playSound() {
+      const sound = document.getElementById('retro-sound');
+      sound.currentTime = 0; // Rewind to start
+      sound.play().catch(err => {
+        console.warn("Audio playback issue (ensure 'sound.wav' is in your repo):", err);
+      });
+    }
+
+    // --- Start Menu Controls ---
+    function toggleStartMenu() {
+      const menu = document.getElementById('start-menu');
+      const btn = document.getElementById('start-btn');
+      menu.classList.toggle('open');
+      btn.classList.toggle('active');
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('start-menu');
+      const btn = document.getElementById('start-btn');
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('open');
+        btn.classList.remove('active');
+      }
+    });
+
+    function shutdownOS() {
+      const menu = document.getElementById('start-menu');
+      const btn = document.getElementById('start-btn');
+      menu.classList.remove('open');
+      btn.classList.remove('active');
+
+      if (confirm("Are you sure you want to shut down?")) {
+        document.body.innerHTML = `
+          <div style="background: black; color: #ff9900; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Courier New', monospace; font-size: 24px; text-align: center; padding: 20px;">
+            It is now safe to turn off your computer.
+          </div>
+        `;
+      }
     }
 
     // --- Selection Box Mechanics ---
