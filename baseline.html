@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retro OS Blog</title>
+  <style>
+    :root {
+      --bg-teal: #008080;
+      --os-gray: #c0c0c0;
+      --border-light: #ffffff;
+      --border-dark: #808080;
+      --border-black: #000000;
+      --navy-blue: #000080;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background-color: var(--bg-teal);
+      font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
+      font-size: 13px;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Desktop Area */
+    .desktop {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+      height: calc(100vh - 36px);
+      align-content: flex-start;
+    }
+
+    .app-icon {
+      width: 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      color: white;
+      text-align: center;
+      text-shadow: 1px 1px 1px #000;
+    }
+
+    .app-icon:hover {
+      outline: 1px dotted #fff;
+    }
+
+    .icon-symbol {
+      font-size: 32px;
+      margin-bottom: 4px;
+    }
+
+    /* Window Styles */
+    .window {
+      position: absolute;
+      background-color: var(--os-gray);
+      border: 2px solid;
+      border-color: var(--border-light) var(--border-black) var(--border-black) var(--border-light);
+      box-shadow: 1px 1px 0px var(--border-dark);
+      width: 480px;
+      min-height: 280px;
+      display: none;
+      flex-direction: column;
+    }
+
+    .window.active {
+      display: flex;
+    }
+
+    .title-bar {
+      background-color: var(--navy-blue);
+      color: white;
+      padding: 3px 6px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: move;
+    }
+
+    .title-bar-controls {
+      display: flex;
+      gap: 2px;
+    }
+
+    .win-btn {
+      width: 16px;
+      height: 14px;
+      background-color: var(--os-gray);
+      border: 1px solid;
+      border-color: var(--border-light) var(--border-black) var(--border-black) var(--border-light);
+      font-size: 9px;
+      line-height: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .win-btn:active {
+      border-color: var(--border-black) var(--border-light) var(--border-light) var(--border-black);
+    }
+
+    .window-body {
+      padding: 12px;
+      margin: 4px;
+      background: white;
+      border: 2px inset var(--border-dark);
+      flex-grow: 1;
+      overflow-y: auto;
+      color: black;
+      user-select: text;
+    }
+
+    /* Taskbar */
+    .taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 36px;
+      background-color: var(--os-gray);
+      border-top: 2px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      padding: 3px 6px;
+      gap: 6px;
+      z-index: 10000;
+    }
+
+    .start-button {
+      font-weight: bold;
+      padding: 4px 10px;
+      background-color: var(--os-gray);
+      border: 2px solid;
+      border-color: var(--border-light) var(--border-black) var(--border-black) var(--border-light);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .taskbar-divider {
+      width: 2px;
+      height: 22px;
+      border-left: 1px solid var(--border-dark);
+      border-right: 1px solid var(--border-light);
+    }
+
+    .open-apps {
+      display: flex;
+      gap: 4px;
+      flex-grow: 1;
+    }
+
+    .taskbar-app {
+      padding: 3px 8px;
+      background: var(--os-gray);
+      border: 2px solid;
+      border-color: var(--border-light) var(--border-black) var(--border-black) var(--border-light);
+      cursor: pointer;
+      font-size: 11px;
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .taskbar-app.active {
+      background: #e0e0e0;
+      border-color: var(--border-black) var(--border-light) var(--border-light) var(--border-black);
+      font-weight: bold;
+    }
+
+    .clock {
+      border: 2px inset var(--border-dark);
+      padding: 2px 8px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Desktop Icons -->
+  <div class="desktop">
+    <div class="app-icon" onclick="openApp('home-win')">
+      <div class="icon-symbol">🏠</div>
+      <span>Home.exe</span>
+    </div>
+    <div class="app-icon" onclick="openApp('blog-win')">
+      <div class="icon-symbol">📰</div>
+      <span>BlogReader.exe</span>
+    </div>
+    <div class="app-icon" onclick="openApp('about-win')">
+      <div class="icon-symbol">💾</div>
+      <span>AboutUs.txt</span>
+    </div>
+    <div class="app-icon" onclick="openApp('contact-win')">
+      <div class="icon-symbol">📫</div>
+      <span>Contact.exe</span>
+    </div>
+  </div>
+
+  <!-- App Windows -->
+  
+  <!-- Home App -->
+  <div id="home-win" class="window active" style="top: 40px; left: 100px;">
+    <div class="title-bar">
+      <span>Home.exe</span>
+      <div class="title-bar-controls">
+        <button class="win-btn" onclick="closeApp('home-win')">X</button>
+      </div>
+    </div>
+    <div class="window-body">
+      <h2>Welcome to Retro OS</h2>
+      <p>System initialized successfully. Double-click or click any desktop icon to launch different sections of the site.</p>
+    </div>
+  </div>
+
+  <!-- Blog App -->
+  <div id="blog-win" class="window" style="top: 80px; left: 160px;">
+    <div class="title-bar">
+      <span>BlogReader v1.0</span>
+      <div class="title-bar-controls">
+        <button class="win-btn" onclick="closeApp('blog-win')">X</button>
+      </div>
+    </div>
+    <div class="window-body">
+      <h2>Recent Blog Posts</h2>
+      <hr>
+      <article>
+        <h3>Designing for Nostalgia</h3>
+        <small>Posted on July 20, 2026</small>
+        <p>Tactile UI design gives modern web pages character that sleek, flat designs often lack...</p>
+      </article>
+      <hr>
+      <article>
+        <h3>Building OS Interfaces in CSS</h3>
+        <small>Posted on June 10, 2026</small>
+        <p>Using inset borders, fixed fonts, and low-color palettes captures the late 90s visual language perfectly.</p>
+      </article>
+    </div>
+  </div>
+
+  <!-- About Us App -->
+  <div id="about-win" class="window" style="top: 120px; left: 220px;">
+    <div class="title-bar">
+      <span>AboutUs.txt - Notepad</span>
+      <div class="title-bar-controls">
+        <button class="win-btn" onclick="closeApp('about-win')">X</button>
+      </div>
+    </div>
+    <div class="window-body">
+      <h3>About This Site</h3>
+      <p>This blog is designed around retro computing interfaces.</p>
+      <p>Features include:</p>
+      <ul>
+        <li>Movable windows</li>
+        <li>Dynamic depth sorting (z-index focus)</li>
+        <li>Native taskbar window tracking</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Contact App -->
+  <div id="contact-win" class="window" style="top: 160px; left: 280px;">
+    <div class="title-bar">
+      <span>Contact.exe</span>
+      <div class="title-bar-controls">
+        <button class="win-btn" onclick="closeApp('contact-win')">X</button>
+      </div>
+    </div>
+    <div class="window-body">
+      <h2>Send Message</h2>
+      <form onsubmit="event.preventDefault(); alert('Message sent!');">
+        <label>Return Email:</label><br>
+        <input type="email" style="width: 100%; margin-bottom: 8px;" required><br>
+        <label>Message Payload:</label><br>
+        <textarea style="width: 100%; height: 80px; margin-bottom: 8px;" required></textarea><br>
+        <button type="submit" style="padding: 4px 12px; background: var(--os-gray); border: 2px solid; border-color: white black black white; cursor: pointer;">Transmit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Taskbar -->
+  <div class="taskbar">
+    <button class="start-button">💻 Start</button>
+    <div class="taskbar-divider"></div>
+    <div id="open-apps" class="open-apps"></div>
+    <div class="clock" id="clock">12:00 PM</div>
+  </div>
+
+  <script>
+    let highestZ = 100;
+
+    // Window Draggability & Layering
+    document.querySelectorAll('.window').forEach(win => {
+      const titleBar = win.querySelector('.title-bar');
+      let isDragging = false;
+      let offsetX, offsetY;
+
+      win.addEventListener('mousedown', () => bringToFront(win));
+
+      titleBar.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - win.offsetLeft;
+        offsetY = e.clientY - win.offsetTop;
+        bringToFront(win);
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          win.style.left = `${e.clientX - offsetX}px`;
+          win.style.top = `${e.clientY - offsetY}px`;
+        }
+      });
+
+      document.addEventListener('mouseup', () => { isDragging = false; });
+    });
+
+    function bringToFront(win) {
+      highestZ++;
+      win.style.zIndex = highestZ;
+    }
+
+    function openApp(id) {
+      const win = document.getElementById(id);
+      win.classList.add('active');
+      bringToFront(win);
+      renderTaskbar();
+    }
+
+    function closeApp(id) {
+      const win = document.getElementById(id);
+      win.classList.remove('active');
+      renderTaskbar();
+    }
+
+    function renderTaskbar() {
+      const container = document.getElementById('open-apps');
+      container.innerHTML = '';
+      
+      document.querySelectorAll('.window.active').forEach(win => {
+        const title = win.querySelector('.title-bar span').innerText;
+        const btn = document.createElement('button');
+        btn.className = 'taskbar-app active';
+        btn.innerText = title;
+        btn.onclick = () => bringToFront(win);
+        container.appendChild(btn);
+      });
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+    renderTaskbar();
+  </script>
+</body>
+</html>
